@@ -1,7 +1,7 @@
 // Copyright 2009-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-#include <syclbvh/adaptor.hpp>
+#include <syclbvh/adaptor/rtcore.h>
 #include <stdio.h>
 #include <math.h>
 #include <limits>

@@ -1,54 +1,6 @@
-#include <cstddef> 
+#pragma once
 #include <sycl/sycl.hpp>
-
-#if defined(_WIN32) && !defined(__MINGW32__)
-#  define RTC_ALIGN(...) __declspec(align(__VA_ARGS__))
-#else
-#  define RTC_ALIGN(...) __attribute__((aligned(__VA_ARGS__)))
-#endif
-
-#define RTC_INVALID_GEOMETRY_ID ((unsigned int)-1)
-
-struct RTCDevice{
-public:
-    RTCDevice(){
-        q = sycl::queue{sycl::default_selector_v};
-    };
-    RTCDevice(const char*) : RTCDevice(){}
-    operator int(){return 1;};
-    sycl::queue q;
-};
-
-
-enum RTCError{};
-enum RTCFormat{
-    RTC_FORMAT_FLOAT3,
-    RTC_FORMAT_UINT3
-};
-enum RTCBufferType{
-    RTC_BUFFER_TYPE_VERTEX,
-    RTC_BUFFER_TYPE_INDEX
-};
-enum RTCGeometryType{
-    RTC_GEOMETRY_TYPE_TRIANGLE
-};
-
-struct RTCGeometryImpl{
-    RTCDevice device;
-    RTCGeometryType type;
-
-    void* buffers[2];
-    int buffer_sizes[2];
-
-    void print(){
-        std::cout << "RTCGeometry: " << type << std::endl;
-    }
-};
-
-struct RTCGeometry{
-    RTCGeometry(){}
-    RTCGeometryImpl* impl;
-};
+#include "rtcore_device.h"
 
 struct RTCSceneImpl{
     void print(){
@@ -64,90 +16,21 @@ struct RTCScene{
     RTCSceneImpl* impl;
 };
 
-typedef void (*RTCErrorFunction)(
-      void* userPtr,
-      RTCError code,
-      const char* str
-    );
 
-#define RTC_MAX_INSTANCE_LEVEL_COUNT 1
-struct RTC_ALIGN(16) RTCHit
-{
-  float Ng_x;       
-  float Ng_y;  
-  float Ng_z; 
-  float u;  
-  float v; 
-
-  unsigned int primID; 
-  unsigned int geomID;
-  unsigned int instID[RTC_MAX_INSTANCE_LEVEL_COUNT]; 
-};
-
-struct RTC_ALIGN(16) RTCRay
-{
-  float org_x;       
-  float org_y; 
-  float org_z;   
-  float tnear;
-
-  float dir_x;       
-  float dir_y; 
-  float dir_z;       
-  float time;
-
-  float tfar; 
-  unsigned int mask;
-  unsigned int id;
-  unsigned int flags;
-};
-
-struct RTCRayHit
-{
-  struct RTCRay ray;
-  struct RTCHit hit;
-};
-
-
-inline RTCDevice rtcNewDevice(const char* config){ return RTCDevice(config);}
-inline int rtcGetDeviceError(RTCDevice device){ return 0;}
-inline void rtcSetDeviceErrorFunction(RTCDevice device, RTCErrorFunction error, void* userPtr){}
 inline RTCScene rtcNewScene(RTCDevice device){
     RTCScene scene = RTCScene();
     scene.impl = sycl::malloc_shared<RTCSceneImpl>(1, device.q);
     return scene;
 };  
-inline RTCGeometry rtcNewGeometry(RTCDevice device, int type){
-    RTCGeometry geometry{};
-    geometry.impl = sycl::malloc_shared<RTCGeometryImpl>(1, device.q);
-    geometry.impl->device = device;
-    geometry.impl->type = (RTCGeometryType)type;
-    return geometry;
-};
-inline void* rtcSetNewGeometryBuffer(RTCGeometry geometry, RTCBufferType type, unsigned int slot, RTCFormat format, std::size_t byteStride, std::size_t itemCount){
 
-    void* buffer = nullptr;
-
-    if(format == RTC_FORMAT_FLOAT3){
-        buffer =(void*) sycl::malloc_shared<sycl::float3>(itemCount, geometry.impl->device.q);
-    }
-
-    if(format == RTC_FORMAT_UINT3){
-        buffer =(void*) sycl::malloc_shared<sycl::uint3>(itemCount, geometry.impl->device.q);
-    }
-   
-    geometry.impl->buffers[type] = buffer;
-    geometry.impl->buffer_sizes[type] = itemCount;
-    return buffer;
-}
-inline void rtcCommitGeometry(RTCGeometry geometry){};
-inline void rtcAttachGeometry(RTCScene scene, RTCGeometry geometry){
+void rtcAttachGeometry(RTCScene scene, RTCGeometry geometry){
     scene.impl->geometries.push_back(geometry);
 };
-inline void rtcReleaseGeometry(RTCGeometry geometry){};
-inline void rtcReleaseScene(RTCScene scene){};
-inline void rtcReleaseDevice(RTCDevice device){};
-inline void rtcCommitScene(RTCScene scene){};
+
+void rtcCommitScene(RTCScene scene){};
+void rtcReleaseScene(RTCScene scene){};
+
+
 
 struct Vec3 {
     float x, y, z;
