@@ -1,7 +1,7 @@
 #pragma once
+#include "rtcore_common.h"
 
 
-#define RTC_MAX_INSTANCE_LEVEL_COUNT 1
 struct RTC_ALIGN(16) RTCHit
 {
   float Ng_x;       

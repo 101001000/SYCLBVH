@@ -5,7 +5,7 @@ cmake -S .. -DCMAKE_INSTALL_PREFIX=./install
 cmake --build . --target install
 
 cd ..
-cd adaptor_test
+cd adaptor_test/
 rm build -rf
 mkdir build
 cd build

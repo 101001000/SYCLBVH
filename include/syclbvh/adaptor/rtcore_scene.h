@@ -17,18 +17,22 @@ struct RTCScene{
 };
 
 
+enum RTCSceneFlags{
+  RTC_SCENE_FLAG_NONE                         = 0
+};
+
 inline RTCScene rtcNewScene(RTCDevice device){
     RTCScene scene = RTCScene();
     scene.impl = sycl::malloc_shared<RTCSceneImpl>(1, device.q);
     return scene;
 };  
 
-void rtcAttachGeometry(RTCScene scene, RTCGeometry geometry){
+inline void rtcAttachGeometry(RTCScene scene, RTCGeometry geometry){
     scene.impl->geometries.push_back(geometry);
 };
 
-void rtcCommitScene(RTCScene scene){};
-void rtcReleaseScene(RTCScene scene){};
+inline void rtcCommitScene(RTCScene scene){};
+inline void rtcReleaseScene(RTCScene scene){};
 
 
 
@@ -42,7 +46,7 @@ struct Vec3 {
     float dot(const Vec3& b) const {return x*b.x + y*b.y + z*b.z;}
 };
 
-bool intersectRayTriangle(const Vec3& orig, const Vec3& dir,
+inline bool intersectRayTriangle(const Vec3& orig, const Vec3& dir,
                           const Vec3& v0, const Vec3& v1, const Vec3& v2,
                           float& tOut, float& uOut, float& vOut){
     const float EPS = 1e-8f;
@@ -70,7 +74,7 @@ bool intersectRayTriangle(const Vec3& orig, const Vec3& dir,
     return true;
 }
 
-void rtcIntersect1(RTCScene scene, RTCRayHit* rayhit){
+inline void rtcIntersect1(RTCScene scene, RTCRayHit* rayhit){
 
     RTCGeometry geometry = scene.impl->geometries[0];
 
@@ -131,3 +135,6 @@ void rtcIntersect1(RTCScene scene, RTCRayHit* rayhit){
 
     std::memcpy(rayhit, dev_hit, sizeof(RTCRayHit));
 }
+
+inline void rtcAttachGeometryByID(RTCScene scene, RTCGeometry geometry, unsigned int geomID){}
+inline void rtcSetSceneFlags(RTCScene scene, enum RTCSceneFlags flags) {}
