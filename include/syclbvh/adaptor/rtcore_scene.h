@@ -117,8 +117,8 @@ void rtcIntersect1(RTCScene scene, RTCRayHit* rayhit){
 
                 float t, u ,v;
 
-                intersectRayTriangle(orig, dir, v0, v1, v2, t, u, v);
-                if(t <  dev_hit->ray.tfar){
+                bool res = intersectRayTriangle(orig, dir, v0, v1, v2, t, u, v);
+                if(res && t <  dev_hit->ray.tfar){
                     dev_hit->ray.tfar = t;
                     dev_hit->hit.geomID = 1;
                     dev_hit->hit.primID = static_cast<unsigned int>(i/3);
